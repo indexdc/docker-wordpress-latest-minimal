@@ -1,0 +1,30 @@
+      
+name: Build and Publish
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # define job to build and publish docker image
+  build:
+    name: Build Docker image
+    # run only when code is compiling and tests are passing
+    runs-on: ubuntu-latest
+
+    # steps to perform in job
+    steps:
+      - uses: actions/checkout@v2
+      - name: docker login
+        env:
+            DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: | 
+            docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Build the Docker Image
+        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/docker-wordpress-latest-minimal
+        
+      - name: Docker Push
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/docker-wordpress-latest-minimal
